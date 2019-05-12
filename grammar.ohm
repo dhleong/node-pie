@@ -1,0 +1,53 @@
+Pie {
+    pieFile = (topLevel | blankLine)*
+
+    topLevel = environmentSpec | environmentalDef | requestDef
+
+    environmentalDef (Header or variable declaration)
+    = headerDef | variableDef
+
+    headerDef (Header)
+    = identifier separator<":"> value
+
+    variableDef (Variable declaration)
+    = "$" identifier separator<"="> value
+
+    environmentSpec (Environment)
+    = "@" identifier separator<":"> inEnvDefs
+
+    inEnvDefs
+    = (inEnvDef | blankLine)*
+
+    inEnvDef (Indented Header or variable)
+    = eos indent environmentalDef
+
+    requestDef (Request)
+    = requestMethod value #eos requestHeaders? requestBody?
+
+    requestMethod
+    = methodName space
+
+    requestHeaders
+    = headerDef+ #eos
+
+    methodName (HTTP Request Method)
+    = upper+
+
+    requestBody (Any series of non-blank lines)
+    = (~emptyLine value eos)+
+
+    eol (End of line)
+    = "\n" | "\r"
+
+    eos (End of statement)
+    = eol | end
+
+    blankLine = eol space*
+    emptyLine = eol space* eol
+
+    separator<token> = spaces token spaces
+    value = (~eol any)+
+    identifier = (alnum | "-")+
+    indent = "\t" | "  "+
+    space := (" " | "\t")+
+}
