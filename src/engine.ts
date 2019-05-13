@@ -22,8 +22,14 @@ export class Engine {
             resolveWithFullResponse: true,
         }, req));
 
+        let bodyJson: any | undefined;
+        if (response.headers["content-type"]) {
+            bodyJson = JSON.parse(response.body);
+        }
+
         return {
             body: response.body,
+            bodyJson,
             headers: response.headers,
             statusCode: response.statusCode,
             statusMessage: response.statusMessage,
