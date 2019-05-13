@@ -83,6 +83,9 @@ export class RequestContext {
                 const [ start, end ] = lines.lineRange(item.interval);
                 if (requestLine >= start && requestLine <= end) {
                     this.requestDef = item;
+
+                    // TODO request-specific vars, headers
+                    return; // done!
                 }
             }
         }
@@ -91,8 +94,9 @@ export class RequestContext {
     private addVar(v: Var) {
         switch (v.type) {
         case VarType.Header:
-            this.headers[v.name] = v.value;
+            this.headers[v.name.toLowerCase()] = v.value;
             break;
+
         case VarType.Variable:
             this.vars[v.name] = v.value;
             break;
