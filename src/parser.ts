@@ -40,7 +40,8 @@ export class Parser {
             environmentSpec: (
                 _,
                 envId,
-                __,
+                __, // separator
+                ___, // comment
                 defs,
             ) => {
                 const evaluatedDefs = defs.evaluate();
@@ -105,7 +106,9 @@ export class Parser {
             identifier: joinString,
             value: joinString,
 
-            blankLine: (_, __) => "",
+            comment: (_, __, ___) => "",
+
+            blankLine: (_, __, ___) => "",
             emptyLine: (_, __, ___) => "",
             eol: _ => "\n",
             eos: _ => "\n",

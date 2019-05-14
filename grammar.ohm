@@ -13,7 +13,7 @@ Pie {
     = "$" identifier separator<"="> value
 
     environmentSpec (Environment)
-    = "@" identifier separator<":"> inEnvDefs
+    = "@" identifier separator<":"> comment? inEnvDefs
 
     inEnvDefs
     = (inEnvDef | blankLine)*
@@ -22,13 +22,17 @@ Pie {
     = eos indent environmentalDef
 
     requestDef (Request)
-    = requestMethod value #eos requestHeaders? requestBody?
+    = requestMethod requestPath #eos requestHeaders? requestBody?
 
     requestMethod
-    = methodName space
+    = methodName space+
+
+    // TODO allow trailing comments?
+    requestPath
+    = value
 
     requestHeaders
-    = headerDef+ #eos
+    = headerDef+ eos
 
     methodName (HTTP Request Method)
     = upper+
@@ -36,14 +40,20 @@ Pie {
     requestBody (Any series of non-blank lines)
     = (~emptyLine value eos)+
 
+    comment (A comment)
+    = space* "#" value
+
+    commentAtEol (A comment)
+    = comment eol
+
     eol (End of line)
     = "\n" | "\r"
 
     eos (End of statement)
-    = eol | end
+    = eol | commentAtEol | end
 
-    blankLine = eol space*
-    emptyLine = eol space* eol
+    blankLine = eol space* comment?
+    emptyLine = eol space* (eol | commentAtEol)
 
     separator<token> = spaces token spaces
     value = (~eol any)+

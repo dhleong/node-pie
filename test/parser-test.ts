@@ -85,4 +85,34 @@ POST /cargo
             },
         ]);
     });
+
+    it("Should ignore comments anywhere except values", async () => {
+        const file = await new Parser().parse(`
+
+@serenity:  # serenity env
+    # env settings
+    Auth: mreynolds
+
+# REQUESTS
+POST /cargo
+{
+    "key": "bobble-geisha"
+}
+
+        `);
+
+        file.entries.should.containSubset([
+            new EnvironmentDef(
+                "serenity",
+                [ Var.header("Auth", "mreynolds") ],
+            ),
+            {
+                method: "POST", path: "/cargo",
+
+                body: `{
+    "key": "bobble-geisha"
+}`,
+            },
+        ]);
+    });
 });
