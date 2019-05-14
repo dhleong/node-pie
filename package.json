@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "/dist"
+    "/dist",
+    "/grammar.ohm"
   ],
   "bin": {
     "node-pie": "./dist/cli/index.js"

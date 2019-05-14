@@ -2,6 +2,7 @@
 
 import yargs from "yargs";
 
+import { daemon } from "./daemon";
 import { executeRequest } from "./exec";
 
 const parser = yargs;
@@ -10,6 +11,12 @@ parser.option("validCommand", {
     default: true,
     hidden: true,
 });
+
+parser.command(
+    "daemon", `Run in daemon mode`, args => {
+        return args;
+    }, daemon,
+);
 
 parser.command(
     "exec <file> <line>", `Execute a request`, args => {
