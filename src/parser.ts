@@ -10,6 +10,17 @@ function joinString(node: ohm.Node) {
     ).join("");
 }
 
+function parseEscapeChar(c: string) {
+    switch (c) {
+    case "\\":
+    case "\"":
+        return c;
+
+    default:
+        throw new Error(`Unsupported escape character ${c}`);
+    }
+}
+
 export class Parser {
     private grammar: ohm.Grammar | undefined;
     private semantics: ohm.Semantics | undefined;
@@ -88,10 +99,11 @@ export class Parser {
             },
 
             variableDef: (
-                _,
+                _,  // "$"
                 name,
-                __,
+                __,  // separator
                 value,
+                ___,  // comment
             ) => Var.variable(
                 name.evaluate(),
                 value.evaluate(),
@@ -107,6 +119,12 @@ export class Parser {
             value: joinString,
 
             comment: (_, __, ___) => "",
+
+            numberValue: value => parseInt(joinString(value), 10),
+            stringValue: (_, value, __) => value.sourceString.replace(
+                /\\(.)/g,
+                (whole, c) => parseEscapeChar(c),
+            ),
 
             blankLine: (_, __, ___) => "",
             emptyLine: (_, __, ___) => "",

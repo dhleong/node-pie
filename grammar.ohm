@@ -10,7 +10,7 @@ Pie {
     = identifier separator<":"> value
 
     variableDef (Variable declaration)
-    = "$" identifier separator<"="> value
+    = "$" identifier separator<"="> variableValue comment?
 
     environmentSpec (Environment)
     = "@" identifier separator<":"> comment? inEnvDefs
@@ -45,6 +45,15 @@ Pie {
 
     commentAtEol (A comment)
     = comment eol
+
+    variableValue (A literal variable value)
+    = stringValue | numberValue
+
+    stringValue (A string literal)
+    = "\"" ((~("\"" | "\\") any) | "\\\\" | "\\\"")+ "\""
+
+    numberValue (A number literal)
+    = digit+
 
     eol (End of line)
     = "\n" | "\r"

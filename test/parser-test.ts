@@ -14,7 +14,7 @@ describe("Parser", () => {
 @serenity:
     Auth: mreynolds
 
-    $cargo = geisha dolls
+    $cargo = "geisha dolls"
 
         `);
 
@@ -92,6 +92,7 @@ POST /cargo
 @serenity:  # serenity env
     # env settings
     Auth: mreynolds
+    $type = "firefly"  # ship type
 
 # REQUESTS
 POST /cargo
@@ -104,7 +105,10 @@ POST /cargo
         file.entries.should.containSubset([
             new EnvironmentDef(
                 "serenity",
-                [ Var.header("Auth", "mreynolds") ],
+                [
+                    Var.header("Auth", "mreynolds"),
+                    Var.variable("type", "firefly"),
+                ],
             ),
             {
                 method: "POST", path: "/cargo",
@@ -113,6 +117,24 @@ POST /cargo
     "key": "bobble-geisha"
 }`,
             },
+        ]);
+    });
+
+    it("handles escaped chars in strings", async () => {
+        const file = await new Parser().parse(`
+$cargo = "\\"totally legal\\" \\\\ awesome goods"
+        `);
+
+        file.entries.should.containSubset([
+            Var.variable("cargo", '"totally legal" \\ awesome goods'),
+        ]);
+    });
+
+    it("handles numeric variables", async () => {
+        const file = await new Parser().parse(`$cargo = 42`);
+
+        file.entries.should.containSubset([
+            Var.variable("cargo", 42),
         ]);
     });
 });

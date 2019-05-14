@@ -8,14 +8,14 @@ export class Var {
         return new Var(VarType.Header, name, value);
     }
 
-    public static variable(name: string, value: string) {
+    public static variable(name: string, value: string | number) {
         return new Var(VarType.Variable, name, value);
     }
 
     constructor(
         public readonly type: VarType,
         public readonly name: string,
-        public readonly value: string,
+        public readonly value: string | number,
     ) {}
 }
 
