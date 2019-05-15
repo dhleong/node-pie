@@ -8,6 +8,7 @@ export interface IExecuteFlags {
     color: boolean;
     headers: boolean;
     raw: boolean;
+    status: boolean;
 }
 
 export interface IExecuteOpts extends IExecuteFlags {
@@ -55,10 +56,12 @@ function formatResponse(opts: IExecuteOpts, response: IResponse) {
         return;
     }
 
-    println(
-        chalk`{blueBright HTTP}/{blueBright ${`${response.httpVersion} ${response.statusCode}`}}` +
-        chalk` {cyan ${response.statusMessage}}`,
-    );
+    if (opts.status) {
+        println(
+            chalk`{blueBright HTTP}/{blueBright ${`${response.httpVersion} ${response.statusCode}`}}` +
+            chalk` {cyan ${response.statusMessage}}`,
+        );
+    }
 
     if (opts.headers) {
         for (const [h, v] of Object.entries(response.headers)) {
