@@ -3,13 +3,12 @@ Pie {
 
     topLevel = environmentSpec | environmentalDef | requestDef
 
-    environmentalDef (Header or variable declaration)
-    = headerDef | variableDef
+    environmentalDef = headerDef | variableDef
 
     headerDef (Header)
     = identifier separator<":"> value
 
-    variableDef (Variable declaration)
+    variableDef
     = "$" identifier separator<"="> variableValue comment?
 
     environmentSpec (Environment)
@@ -40,19 +39,19 @@ Pie {
     requestBody (Any series of non-blank lines)
     = (~emptyLine value eos)+
 
-    comment (A comment)
+    comment (a comment)
     = space* "#" value
 
-    commentAtEol (A comment)
+    commentAtEol (a comment)
     = comment eol
 
-    variableValue (A literal variable value)
+    variableValue
     = stringValue | numberValue
 
-    stringValue (A string literal)
+    stringValue (a string literal)
     = "\"" ((~("\"" | "\\") any) | "\\\\" | "\\\"")+ "\""
 
-    numberValue (A number literal)
+    numberValue (a number literal)
     = digit+
 
     eol (End of line)

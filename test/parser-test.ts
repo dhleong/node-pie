@@ -1,11 +1,26 @@
 import * as chai from "chai";
 import chaiSubset from "chai-subset";
 
+import { AssertionError } from "chai";
 import { EnvironmentDef, Var } from "../src/ast";
 import { Parser } from "../src/parser";
 
 chai.use(chaiSubset);
 chai.should();
+
+async function exceptionOf(promise: Promise<any>): Promise<Error> {
+    try {
+        await promise;
+
+        throw new AssertionError("Expected promise to reject");
+    } catch (e) {
+        if (e instanceof AssertionError) {
+            throw e;
+        }
+
+        return e;
+    }
+}
 
 describe("Parser", () => {
     it("Should handle blank-line separated env defs", async () => {
@@ -136,5 +151,11 @@ $cargo = "\\"totally legal\\" \\\\ awesome goods"
         file.entries.should.containSubset([
             Var.variable("cargo", 42),
         ]);
+    });
+
+    it("provides helpful errors on variable syntax errors", async () => {
+        const e = await exceptionOf(new Parser().parse(`$cargo = dolls`));
+        e.should.have.property("message")
+            .that.matches(/Expected .* string literal/);
     });
 });
