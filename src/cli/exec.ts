@@ -41,7 +41,7 @@ function formatHeader(
     const v = typeof value === "string"
         ? value
         : value.join(", ");
-    return `${chalk.yellow(name)}: ${chalk.white(v)}`;
+    return chalk`{cyan ${name}}{white :} {hex("#fff") ${v}}`;
 }
 
 function formatResponse(opts: IExecuteOpts, response: IResponse) {
@@ -54,6 +54,8 @@ function formatResponse(opts: IExecuteOpts, response: IResponse) {
         return;
     }
 
+    println(chalk`{blueBright ${response.statusCode.toString()}} {cyan ${response.statusMessage}}`);
+
     if (opts.headers) {
         for (const [h, v] of Object.entries(response.headers)) {
             if (!v) continue;
@@ -62,10 +64,22 @@ function formatResponse(opts: IExecuteOpts, response: IResponse) {
     }
 
     if (response.bodyJson) {
+        println();
         println(doColorJson(response.bodyJson));
         return;
     }
 
-    // TODO
-    println(response);
+    if ((response.body as Buffer).includes("\u0000")) {
+        const lengthInfo = response.body && response.body.length
+            ? chalk` {gray (} {blue ${response.body.length} bytes} {gray )}`
+            : "";
+
+        println(chalk`
+{white.bold [} {white binary data not printed}${lengthInfo} {white.bold ]}
+`);
+        return;
+    }
+
+    // fallback
+    println(response.body);
 }
