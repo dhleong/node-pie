@@ -39,9 +39,10 @@ function formatHeader(
     value: string | string[],
 ) {
     const v = typeof value === "string"
-        ? value
-        : value.join(", ");
-    return chalk`{cyan ${name}}{white :} {hex("#fff") ${v}}`;
+        ? chalk`{hex("#fff") ${value}}`
+        : value.map(part => chalk`\`{hex("#fff") ${part}}\``)
+            .join(chalk` {gray ,} `);
+    return chalk`{cyan ${name}}{white :} ${v}`;
 }
 
 function formatResponse(opts: IExecuteOpts, response: IResponse) {
@@ -54,7 +55,10 @@ function formatResponse(opts: IExecuteOpts, response: IResponse) {
         return;
     }
 
-    println(chalk`{blueBright ${response.statusCode.toString()}} {cyan ${response.statusMessage}}`);
+    println(
+        chalk`{blueBright HTTP}/{blueBright ${`${response.httpVersion} ${response.statusCode}`}}` +
+        chalk` {cyan ${response.statusMessage}}`,
+    );
 
     if (opts.headers) {
         for (const [h, v] of Object.entries(response.headers)) {

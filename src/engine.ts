@@ -9,6 +9,7 @@ export interface IResponse {
     body: any;
     bodyJson?: any;
     headers: IncomingHttpHeaders;
+    httpVersion: string;
     statusCode: number;
     statusMessage: string;
 }
@@ -40,6 +41,7 @@ export class Engine {
             body: response.body,
             bodyJson,
             headers: response.headers,
+            httpVersion: response.httpVersion,
             statusCode: response.statusCode,
             statusMessage: response.statusMessage,
         };
