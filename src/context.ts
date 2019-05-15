@@ -3,7 +3,7 @@ import { EnvironmentDef, IInterval, PieFile, RequestDef, Var, VarType } from "./
 export const ENV_VAR_NAME = "ENV";
 
 interface IVarMap {
-    [key: string]: string;
+    [key: string]: string | number;
 }
 
 class LineTracker {

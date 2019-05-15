@@ -46,7 +46,7 @@ export class Engine {
 
         const headers: {[key: string]: string} = {};
         for (const [header, headerValue] of Object.entries(context.headers)) {
-            headers[header] = headerValue;
+            headers[header] = headerValue.toString();
         }
 
         const req: request.OptionsWithUrl = {
@@ -60,12 +60,14 @@ export class Engine {
         for (const [n, v] of Object.entries(context.vars)) {
             const varName = "$" + n;
 
+            const stringValue = v.toString();
+
             // TODO form encoded body vs json body interpolation?
             if (req.body) req.body = req.body.replace(varName, v);
-            req.url = (req.url as string).replace(varName, encodeURIComponent(v));
+            req.url = (req.url as string).replace(varName, encodeURIComponent(stringValue));
 
             for (const [header, headerValue] of Object.entries(headers)) {
-                headers[header] = headerValue.replace(varName, v);
+                headers[header] = headerValue.replace(varName, stringValue);
             }
         }
 
