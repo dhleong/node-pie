@@ -32,7 +32,7 @@ export class Engine {
         }, req));
 
         let bodyJson: any | undefined;
-        if (response.headers["content-type"]) {
+        if (response.headers["content-type"] === "application/json") {
             bodyJson = JSON.parse(response.body);
         }
 
