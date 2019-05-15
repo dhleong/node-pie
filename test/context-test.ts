@@ -8,12 +8,12 @@ chai.should();
 describe("RequestContext", () => {
     it("respects $ENV", async () => {
         const file = await new Parser().parse(`
-$ENV = serenity
+$ENV = "serenity"
 @serenity:
-    $captain = mreynolds
+    $captain = "mreynolds"
 
 @alliance:
-    $captain = nobody
+    $captain = "nobody"
 
 GET /captains/$captain
         `);
