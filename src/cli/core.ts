@@ -4,6 +4,7 @@ import yargs from "yargs";
 
 import { daemon } from "./daemon";
 import { executeRequest } from "./exec";
+import { withExecuteFlags } from "./flags";
 
 const parser = yargs;
 
@@ -20,7 +21,7 @@ parser.command(
 
 parser.command(
     "exec <file> <line>", `Execute a request`, args => {
-        return args.positional("file", {
+        return withExecuteFlags(args).positional("file", {
             describe: "The file to parse",
             type: "string",
         }).demand("file")

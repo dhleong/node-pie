@@ -6,6 +6,11 @@ export function clearScreen() {
     console.clear();
 }
 
+export function println(...args: any[]) {
+    // tslint:disable-next-line no-console
+    console.log(...args);
+}
+
 export function colorize(json: any) {
     return colorizer(json, {
         pretty: true,

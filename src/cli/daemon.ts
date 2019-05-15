@@ -1,5 +1,8 @@
+import chalk from "Chalk";
+import { ParseError } from "../parser";
 import { executeRequest } from "./exec";
-import { clearScreen, readLines } from "./util";
+import { executeFlagDefaults } from "./flags";
+import { clearScreen, println, readLines } from "./util";
 
 async function runDaemon(stream: NodeJS.ReadStream) {
     for await (const line of readLines()) {
@@ -9,7 +12,19 @@ async function runDaemon(stream: NodeJS.ReadStream) {
         }
 
         clearScreen();
-        executeRequest(input);
+
+        try {
+            const fullRequest = Object.assign({}, executeFlagDefaults, input);
+            await executeRequest(fullRequest);
+        } catch (e) {
+            if (e instanceof ParseError) {
+                // TODO better coloring?
+                println(chalk.red(e.message));
+            } else {
+                // unrecoverable (?)
+                throw e;
+            }
+        }
     }
 }
 

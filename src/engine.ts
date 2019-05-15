@@ -1,8 +1,17 @@
 import request from "request-promise-native";
 
+import { IncomingHttpHeaders } from "http";
 import { PieFile } from "./ast";
 import { RequestContext } from "./context";
 import { Parser } from "./parser";
+
+export interface IResponse {
+    body: any;
+    bodyJson?: any;
+    headers: IncomingHttpHeaders;
+    statusCode: number;
+    statusMessage: string;
+}
 
 export class Engine {
     public static async fromString(s: string) {
@@ -16,7 +25,7 @@ export class Engine {
 
     public async performRequestAt(
         lineNr: number,
-    ) {
+    ): Promise<IResponse> {
         const req = this.buildRequestAt(lineNr);
         const response: request.FullResponse = await request(Object.assign({
             resolveWithFullResponse: true,

@@ -21,6 +21,9 @@ function parseEscapeChar(c: string) {
     }
 }
 
+export class ParseError extends Error {
+}
+
 export class Parser {
     private grammar: ohm.Grammar | undefined;
     private semantics: ohm.Semantics | undefined;
@@ -29,7 +32,7 @@ export class Parser {
         const [g, s] = await this.ensureGrammar();
         const match = g.match(fileContents);
         if (!match.succeeded()) {
-            throw new Error(match.message);
+            throw new ParseError(match.message);
         }
 
         const topLevels = s(match).evaluate();
