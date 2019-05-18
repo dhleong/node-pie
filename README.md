@@ -36,6 +36,10 @@ $ship = "serenity"
 # variables can be used in most places you'd expect:
 GET /ships/$ship/crew
 
+# Like headers, you can declare a variable multiple times, and the closest
+# one *above* the request will be used. Variables and headers declared
+# *below* a request are not considered for that request!
+
 # this is an environment:
 @core-planet:
     # variables and headers declared in an environment will only be
@@ -46,8 +50,13 @@ GET /ships/$ship/crew
     # like, so long as the lines are all indented!
     Authorization: mreynolds
 
-# $ENV is a special variable for choosing the active environment. You can
-# only have one environment at a time right now, but we'll probably let you
-# mix and match in the future!
+# $ENV is a special variable for choosing the active environment. Headers
+# and variables declared in an environment are only used in/available to
+# a request if that environment is active
 $ENV = "core-planet"
+
+# You can activate multiple environments by separating their names with
+# commas. If multiple environments declare the same header or variable,
+# the one declared lower in the file will be used.
+$ENV = "core-planet,serenity,firefly"
 ```

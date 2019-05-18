@@ -66,7 +66,9 @@ export class RequestContext {
             VarType.Variable,
             ENV_VAR_NAME,
         );
-        const envName = envVar ? envVar.value : "";
+        const environments: Set<string> = envVar
+            ? new Set((envVar.value.toString()).split(","))
+            : new Set();
 
         const lines = new LineTracker(file.source);
 
@@ -74,7 +76,7 @@ export class RequestContext {
             if (item instanceof Var) {
                 this.addVar(item);
             } else if (item instanceof EnvironmentDef) {
-                if (item.id !== envName) continue;
+                if (!environments.has(item.id)) continue;
 
                 for (const child of item.vars) {
                     this.addVar(child);
