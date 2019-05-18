@@ -44,6 +44,12 @@ interface ISimpleExec {
 }
 
 function isSimpleExec(json: any): json is ISimpleExec {
+    if (json.file === "" || json.file === "-") {
+        // this is used to indicate stdin, which is
+        // not compatible with daemon mode
+        throw new Error("Invalid file name: -");
+    }
+
     return typeof json.file === "string"
         && typeof json.line === "number";
 }

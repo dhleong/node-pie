@@ -21,6 +21,17 @@ export function colorize(json: any) {
     });
 }
 
+export const readAllStdin = () => new Promise<Buffer>((resolve, reject) => {
+    const buffers: Buffer[] = [];
+    process.stdin.on("data", data => {
+        buffers.push(data);
+    });
+    process.stdin.on("end", () => {
+        resolve(Buffer.concat(buffers));
+    });
+    process.stdin.on("error", reject);
+});
+
 export async function* readLines() {
     const lines = readline.createInterface({
         input: process.stdin,
