@@ -22,7 +22,7 @@ parser.command(
 parser.command(
     "exec <file> <line>", `Execute a request`, args => {
         return withExecuteFlags(args).positional("file", {
-            describe: "The file to parse",
+            describe: "The file to parse; use - to read from stdin",
             type: "string",
         }).demand("file")
             .positional("line", {
