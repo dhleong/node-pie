@@ -38,4 +38,19 @@ GET /ships/$class
         context.vars.captain.should.equal("mreynolds");
         context.vars.class.should.equal("03-K64-Firefly");
     });
+
+    it("handles request-specific headers", async () => {
+        const file = await new Parser().parse(`
+$ENV = "serenity"
+Authorization: none
+@serenity:
+    Authorization: serenity
+
+GET /ships/serenity
+Authorization: kaylee
+        `);
+
+        const context = RequestContext.create(file, 8);
+        context.headers.authorization.should.equal("kaylee");
+    });
 });

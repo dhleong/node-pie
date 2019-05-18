@@ -93,12 +93,20 @@ export class Parser {
                     methodName.sourceString.trim(),
                     requestPath.evaluate(),
                     bodyMaybe.length ? bodyMaybe[0] : null,
+                    headerDefs.evaluate()[0] || [],
                     {
                         start: methodName.source.startIdx,
 
                         end: body.source.endIdx,
                     },
                 );
+            },
+
+            requestHeaders: (
+                headers,
+                _,
+            ) => {
+                return headers.evaluate();
             },
 
             variableDef: (

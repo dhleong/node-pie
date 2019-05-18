@@ -2,7 +2,7 @@ import * as chai from "chai";
 import chaiSubset from "chai-subset";
 
 import { AssertionError } from "chai";
-import { EnvironmentDef, Var } from "../src/ast";
+import { EnvironmentDef, RequestDef, Var } from "../src/ast";
 import { Parser } from "../src/parser";
 
 chai.use(chaiSubset);
@@ -54,6 +54,31 @@ GET /cargo
         file.entries.should.containSubset([
             { method: "GET", path: "/cargo" },
         ]);
+    });
+
+    it("Should handle request-specific headers", async () => {
+        const file = await new Parser().parse(`
+
+GET /cargo
+Ship: serenity
+Pilot: wash
+
+GET /crew
+        `);
+
+        file.entries.should.containSubset([
+            {
+                method: "GET",
+                path: "/cargo",
+
+                headers: [
+                    Var.header("Ship", "serenity"),
+                    Var.header("Pilot", "wash"),
+                ],
+            },
+        ]);
+
+        (file.entries[1] as RequestDef).headers.should.be.empty;
     });
 
     it("Should handle requests with bodies", async () => {

@@ -40,6 +40,17 @@ GET /ships/$ship/crew
 # one *above* the request will be used. Variables and headers declared
 # *below* a request are not considered for that request!
 
+# One exception to the rule is if you put headers *immediately following*
+# a request, with no blank lines, they will *only* apply to that request:
+GET /ships/$ship/cargo
+X-Location: secret-compartment
+
+# When using request-specific headers, any body must immediately follow
+# the last header, with no blank spaces:
+POST /ships/$ship/cargo
+X-Location: secret-compartment
+{ "id": "definitely-not-contraband" }
+
 # this is an environment:
 @core-planet:
     # variables and headers declared in an environment will only be

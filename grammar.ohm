@@ -31,7 +31,7 @@ Pie {
     = value
 
     requestHeaders
-    = headerDef+ eos
+    = (headerDef eos)+
 
     methodName (HTTP Request Method)
     = upper+

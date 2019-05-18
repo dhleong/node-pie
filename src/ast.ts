@@ -39,6 +39,7 @@ export class RequestDef {
         public readonly method: string,
         public readonly path: string,
         public readonly body: string | null,
+        public readonly headers: Var[],
         public readonly interval: IInterval,
     ) {}
 }

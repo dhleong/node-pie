@@ -86,7 +86,10 @@ export class RequestContext {
                 if (requestLine >= start && requestLine <= end) {
                     this.requestDef = item;
 
-                    // TODO request-specific vars, headers
+                    // request-specific headers
+                    for (const v of item.headers) {
+                        this.addVar(v);
+                    }
                     return; // done!
                 }
             }
