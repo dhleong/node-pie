@@ -70,8 +70,9 @@ function formatResponse(opts: IExecuteFlags, response: IResponse) {
     }
 
     if (opts.status) {
+        const color = pickStatusColor(response.statusCode);
         println(
-            chalk`{blueBright HTTP}/{blueBright ${`${response.httpVersion} ${response.statusCode}`}}` +
+            chalk`{${color} HTTP}/{${color} ${`${response.httpVersion} ${response.statusCode}`}}` +
             chalk` {cyan ${response.statusMessage}}`,
         );
     }
@@ -101,5 +102,12 @@ function formatResponse(opts: IExecuteFlags, response: IResponse) {
     }
 
     // fallback
+    println();
     println(response.body);
+}
+
+function pickStatusColor(statusCode: number) {
+    if (statusCode < 300) return "blueBright";
+    if (statusCode < 500) return "red";
+    return "gray";
 }

@@ -1,4 +1,5 @@
 import request from "request-promise-native";
+import { StatusCodeError } from "request-promise-native/errors";
 
 import { IncomingHttpHeaders } from "http";
 import { PieFile } from "./ast";
@@ -28,9 +29,20 @@ export class Engine {
         lineNr: number,
     ): Promise<IResponse> {
         const req = this.buildRequestAt(lineNr);
-        const response: request.FullResponse = await request(Object.assign({
-            resolveWithFullResponse: true,
-        }, req));
+
+        let response: request.FullResponse;
+        try {
+            response = await request(Object.assign({
+                resolveWithFullResponse: true,
+            }, req));
+        } catch (e) {
+            if (e instanceof StatusCodeError) {
+                response = e.response;
+            } else {
+                // other, unexpected error
+                throw e;
+            }
+        }
 
         let bodyJson: any | undefined;
         if (response.headers["content-type"] === "application/json") {
