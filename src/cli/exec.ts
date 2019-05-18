@@ -33,16 +33,18 @@ export async function executeOnContents(
     line: number,
     opts: IExecuteFlags,
 ) {
-    const engine = await Engine.fromString(contents.toString());
-    const response = await engine.performRequestAt(line);
-
     const oldChalkLevel = chalk.level;
     if (!opts.color) {
         chalk.level = 0;
     }
 
+    const engine = await Engine.fromString(contents.toString());
+
     try {
+        const response = await engine.performRequestAt(line);
         formatResponse(opts, response);
+    } catch (e) {
+        formatError(e);
     } finally {
         chalk.level = oldChalkLevel;
     }
@@ -104,6 +106,12 @@ function formatResponse(opts: IExecuteFlags, response: IResponse) {
     // fallback
     println();
     println(response.body);
+}
+
+function formatError(e: Error) {
+    println(chalk`{red Error performing request}:`);
+    println();
+    println(e.stack || e.message);
 }
 
 function pickStatusColor(statusCode: number) {
