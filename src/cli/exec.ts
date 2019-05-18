@@ -20,8 +20,16 @@ export async function executeRequest(
     opts: IExecuteOpts,
 ) {
     const contents = await fs.readFile(opts.file);
+    return executeOnContents(contents, opts.line, opts);
+}
+
+export async function executeOnContents(
+    contents: Buffer | string,
+    line: number,
+    opts: IExecuteFlags,
+) {
     const engine = await Engine.fromString(contents.toString());
-    const response = await engine.performRequestAt(opts.line);
+    const response = await engine.performRequestAt(line);
 
     const oldChalkLevel = chalk.level;
     if (!opts.color) {
@@ -46,7 +54,7 @@ function formatHeader(
     return chalk`{cyan ${name}}{white :} ${v}`;
 }
 
-function formatResponse(opts: IExecuteOpts, response: IResponse) {
+function formatResponse(opts: IExecuteFlags, response: IResponse) {
     const doColorJson = opts.color
         ? colorize
         : (v: any) => JSON.stringify(v, null, 2);

@@ -1,21 +1,23 @@
 import chalk from "Chalk";
 import { ParseError } from "../parser";
-import { executeRequest } from "./exec";
+import { executeOnContents, executeRequest } from "./exec";
 import { executeFlagDefaults } from "./flags";
 import { clearScreen, println, readLines } from "./util";
 
+type DaemonCommand = () => void;
+
+/*
+ * Daemon implementation
+ */
+
 async function runDaemon(stream: NodeJS.ReadStream) {
     for await (const line of readLines()) {
-        const input = JSON.parse(line);
-        if (!(input.file && input.line)) {
-            throw new Error(`Invalid input: ${input}`);
-        }
+        const command = extractCommand(JSON.parse(line));
 
         clearScreen();
 
         try {
-            const fullRequest = Object.assign({}, executeFlagDefaults, input);
-            await executeRequest(fullRequest);
+            await command();
         } catch (e) {
             if (e instanceof ParseError) {
                 // TODO better coloring?
@@ -30,4 +32,66 @@ async function runDaemon(stream: NodeJS.ReadStream) {
 
 export async function daemon() {
     await runDaemon(process.stdin);
+}
+
+/*
+ * Command types
+ */
+
+interface ISimpleExec {
+    file: string;
+    line: number;
+}
+
+function isSimpleExec(json: any): json is ISimpleExec {
+    return typeof json.file === "string"
+        && typeof json.line === "number";
+}
+
+interface IFullExec {
+    lines?: string[];
+    content?: string;
+    line: number;
+}
+
+function isFullExec(json: any): json is IFullExec {
+    if (typeof json.line !== "number") return false;
+    return typeof json.content === "string"
+        || Array.isArray(json.lines);
+}
+
+/*
+ * Command extraction
+ */
+
+function extractCommand(json: unknown): DaemonCommand {
+    if (typeof json === "object" && json) {
+        if (isSimpleExec(json)) {
+            return async () => {
+                const fullRequest = fillRequest(json);
+                await executeRequest(fullRequest);
+            };
+        }
+
+        if (isFullExec(json)) {
+            return async () => {
+                const flags = fillRequest(json);
+                await executeOnContents(
+                    json.content || json.lines!.join("\n"),
+                    json.line,
+                    flags,
+                );
+            };
+        }
+    }
+
+    throw new Error(`Invalid input: ${json}`);
+}
+
+/*
+ * Util
+ */
+
+function fillRequest<T>(json: T) {
+    return Object.assign({}, executeFlagDefaults, json);
 }
