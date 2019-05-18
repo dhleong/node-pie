@@ -12,9 +12,9 @@ type DaemonCommand = () => void;
 
 async function runDaemon(stream: NodeJS.ReadStream) {
     for await (const line of readLines()) {
-        const command = extractCommand(JSON.parse(line));
-
         clearScreen();
+
+        const command = extractCommand(JSON.parse(line));
 
         try {
             await command();
@@ -80,10 +80,11 @@ function extractCommand(json: unknown): DaemonCommand {
         }
 
         if (isFullExec(json)) {
+            const contents = json.content || json.lines!.join("\n");
             return async () => {
                 const flags = fillRequest(json);
                 await executeOnContents(
-                    json.content || json.lines!.join("\n"),
+                    contents,
                     json.line,
                     flags,
                 );

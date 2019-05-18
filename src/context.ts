@@ -8,7 +8,7 @@ interface IVarMap {
 
 class LineTracker {
 
-    private lastLine: number = 0;
+    private lastLine: number = 1;
     private lastOffset: number = 0;
 
     constructor(

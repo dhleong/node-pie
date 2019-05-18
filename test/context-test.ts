@@ -6,6 +6,15 @@ import { Parser } from "../src/parser";
 chai.should();
 
 describe("RequestContext", () => {
+    it("Handles single line", async () => {
+        const file = await new Parser().parse(`
+GET /ship
+        `.trim());
+
+        const context = RequestContext.create(file, 1);
+        context.request.path.should.equal("/ship");
+    });
+
     it("respects $ENV", async () => {
         const file = await new Parser().parse(`
 $ENV = "serenity"
