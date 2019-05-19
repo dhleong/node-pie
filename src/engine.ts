@@ -69,6 +69,7 @@ export class Engine {
 
         const headers: {[key: string]: string} = {};
         for (const [header, headerValue] of Object.entries(context.headers)) {
+            if (header === "host") continue;
             headers[header] = headerValue.toString();
         }
 
