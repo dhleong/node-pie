@@ -45,8 +45,11 @@ export class Engine {
         }
 
         let bodyJson: any | undefined;
-        if (response.headers["content-type"] === "application/json") {
+        try {
             bodyJson = JSON.parse(response.body);
+        } catch (e) {
+            // not parseable as JSON; that's fine
+            bodyJson = undefined;
         }
 
         return {
