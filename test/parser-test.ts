@@ -128,6 +128,7 @@ POST /cargo
 
     it("Should ignore comments anywhere except values", async () => {
         const file = await new Parser().parse(`
+# first line
 
 @serenity:  # serenity env
     # env settings
@@ -140,7 +141,7 @@ POST /cargo
     "key": "bobble-geisha"
 }
 
-        `);
+        `.trim());
 
         file.entries.should.containSubset([
             new EnvironmentDef(

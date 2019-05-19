@@ -1,5 +1,5 @@
 Pie {
-    pieFile = (topLevel | blankLine)*
+    pieFile = (comment | topLevel | blankLine)*
 
     topLevel = environmentSpec | environmentalDef | requestDef
 
