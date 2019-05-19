@@ -51,3 +51,28 @@ export async function* readLines() {
         lines.close();
     }
 }
+
+/**
+ * Start drawing a loading spinner
+ *
+ * @return a function that, when called, stops drawing the spinner
+ */
+export function startSpinner(message: string) {
+    const steps = [
+        "⠄", "⠆", "⠇", "⠋",
+        "⠉",
+        "⠈", "⠘", "⠸", "⠴",
+        "⠤",
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+        clearScreen();
+
+        const spinner = steps[step];
+        step = (step + 1) % steps.length;
+        println(`${spinner} ${message}`);
+    }, 100);
+
+    return () => clearInterval(interval);
+}

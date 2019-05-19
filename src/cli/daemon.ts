@@ -1,8 +1,8 @@
 import chalk from "Chalk";
 import { ParseError } from "../parser";
-import { executeOnContents, executeRequest } from "./exec";
+import { executeOnContents, executeRequest, IExecuteLifecycle } from "./exec";
 import { executeFlagDefaults } from "./flags";
-import { clearScreen, println, readLines } from "./util";
+import { clearScreen, println, readLines, startSpinner } from "./util";
 
 type DaemonCommand = () => void;
 
@@ -14,7 +14,14 @@ async function runDaemon(stream: NodeJS.ReadStream) {
     for await (const line of readLines()) {
         clearScreen();
 
-        const command = extractCommand(JSON.parse(line));
+        const stopSpinner = startSpinner("Fetching...");
+
+        const command = extractCommand(JSON.parse(line), {
+            onResponseReceived() {
+                stopSpinner();
+                clearScreen();
+            },
+        });
 
         try {
             await command();
@@ -70,12 +77,15 @@ function isFullExec(json: any): json is IFullExec {
  * Command extraction
  */
 
-function extractCommand(json: unknown): DaemonCommand {
+function extractCommand(
+    json: unknown,
+    lifecycle: IExecuteLifecycle,
+): DaemonCommand {
     if (typeof json === "object" && json) {
         if (isSimpleExec(json)) {
             return async () => {
                 const fullRequest = fillRequest(json);
-                await executeRequest(fullRequest);
+                await executeRequest(fullRequest, lifecycle);
             };
         }
 
@@ -87,6 +97,7 @@ function extractCommand(json: unknown): DaemonCommand {
                     contents,
                     json.line,
                     flags,
+                    lifecycle,
                 );
             };
         }

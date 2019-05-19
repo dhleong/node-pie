@@ -16,8 +16,13 @@ export interface IExecuteOpts extends IExecuteFlags {
     line: number;
 }
 
+export interface IExecuteLifecycle {
+    onResponseReceived?(): void;
+}
+
 export async function executeRequest(
     opts: IExecuteOpts,
+    lifecycle: IExecuteLifecycle = {},
 ) {
     // NOTE: yargs seems to give us an empty string instead
     // if the `-`
@@ -25,13 +30,14 @@ export async function executeRequest(
         ? await readAllStdin()
         : await fs.readFile(opts.file);
 
-    return executeOnContents(contents, opts.line, opts);
+    return executeOnContents(contents, opts.line, opts, lifecycle);
 }
 
 export async function executeOnContents(
     contents: Buffer | string,
     line: number,
     opts: IExecuteFlags,
+    lifecycle: IExecuteLifecycle = {},
 ) {
     const oldChalkLevel = chalk.level;
     if (!opts.color) {
@@ -42,6 +48,9 @@ export async function executeOnContents(
 
     try {
         const response = await engine.performRequestAt(line);
+
+        trigger(lifecycle, "onResponseReceived");
+
         formatResponse(opts, response);
     } catch (e) {
         formatError(e);
@@ -118,4 +127,12 @@ function pickStatusColor(statusCode: number) {
     if (statusCode < 300) return "blueBright";
     if (statusCode < 500) return "red";
     return "gray";
+}
+
+function trigger(
+    lifecycle: IExecuteLifecycle,
+    event: keyof IExecuteLifecycle,
+) {
+    const handler = lifecycle[event];
+    if (handler) handler();
 }
