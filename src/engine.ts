@@ -4,7 +4,7 @@ import { StatusCodeError } from "request-promise-native/errors";
 import { IncomingHttpHeaders } from "http";
 import { PieFile } from "./ast";
 import { RequestContext } from "./context";
-import { Parser } from "./parser";
+import { ParseError, Parser } from "./parser";
 
 export interface IResponse {
     body: any;
@@ -29,7 +29,12 @@ export class Engine {
         lineNr: number,
     ): Promise<IResponse> {
         const req = this.buildRequestAt(lineNr);
+        return this.performRequest(req);
+    }
 
+    public async performRequest(
+        req: request.OptionsWithUrl,
+    ) {
         let response: request.FullResponse;
         try {
             response = await request(Object.assign({
@@ -98,7 +103,35 @@ export class Engine {
             }
         }
 
+        if (req.body && !(req.headers && req.headers["content-type"])) {
+            req.headers = req.headers || {};
+            req.headers["content-type"] = inferContentType(req.body);
+        } else if (req.body && req.headers && req.headers["content-type"].startsWith("application/json")) {
+            // verify we can parse it as JSON
+            try {
+                JSON.parse(req.body);
+            } catch (e) {
+                throw new ParseError("JSON content type declared, but failed to parse as JSON:\n" + e.stack);
+            }
+        }
+
         return req;
     }
 
+}
+
+function inferContentType(body: string) {
+    const startTrimmed = body.trimLeft();
+    if (startTrimmed.startsWith("{") || startTrimmed.startsWith("[")) {
+        try {
+            JSON.parse(startTrimmed);
+
+            // TODO charset?
+            return "application/json";
+        } catch (e) {
+            // ignore parse failure
+        }
+    }
+
+    // TODO ?
 }
