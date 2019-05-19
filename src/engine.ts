@@ -15,6 +15,10 @@ export interface IResponse {
     statusMessage: string;
 }
 
+const defaultHeaders = {
+    "user-agent": `node-pie/${require("../package.json").version}`,
+};
+
 export class Engine {
     public static async fromString(s: string) {
         const file = await new Parser().parse(s);
@@ -75,10 +79,10 @@ export class Engine {
             throw new Error("No host provided");
         }
 
-        const headers: {[key: string]: string} = {};
+        const headers: {[key: string]: string} = Object.assign({}, defaultHeaders);
         for (const [header, headerValue] of Object.entries(context.headers)) {
             if (header === "host") continue;
-            headers[header] = headerValue.toString();
+            headers[header.toLowerCase()] = headerValue.toString();
         }
 
         const req: request.OptionsWithUrl = {
