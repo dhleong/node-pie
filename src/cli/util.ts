@@ -1,3 +1,4 @@
+import fs from "fs-extra";
 import colorizer from "json-colorizer";
 import readline from "readline";
 
@@ -20,6 +21,15 @@ export function colorize(json: any) {
         },
     });
 }
+
+// NOTE: yargs seems to give us an empty string instead
+// if the `-`
+export const isStdinFileValue = (value: string) =>
+    value === "" || value === "-";
+
+export const readFileValue = (file: string) => isStdinFileValue(file)
+    ? readAllStdin()
+    : fs.readFile(file);
 
 export const readAllStdin = () => new Promise<Buffer>((resolve, reject) => {
     const buffers: Buffer[] = [];

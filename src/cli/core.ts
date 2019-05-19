@@ -4,7 +4,8 @@ import yargs from "yargs";
 
 import { daemon } from "./daemon";
 import { executeRequest } from "./exec";
-import { withExecuteFlags } from "./flags";
+import { withExecuteFlags, withFile } from "./flags";
+import { lint } from "./lint";
 
 const parser = yargs;
 
@@ -21,15 +22,18 @@ parser.command(
 
 parser.command(
     "exec <file> <line>", `Execute a request`, args => {
-        return withExecuteFlags(args).positional("file", {
-            describe: "The file to parse; use - to read from stdin",
-            type: "string",
-        }).demand("file")
+        return withFile(withExecuteFlags(args))
             .positional("line", {
                 describe: "The line number of the request to execute",
                 type: "number",
             }).demand("line");
     }, executeRequest,
+);
+
+parser.command(
+    "lint <file>", `Check a file for problems`, args => {
+        return withFile(args);
+    }, lint,
 );
 
 parser.help()

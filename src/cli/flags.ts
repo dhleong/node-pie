@@ -29,3 +29,12 @@ export function withExecuteFlags<T>(
         type: "boolean",
     });
 }
+
+export function withFile<T>(
+    args: Argv<T>,
+) {
+    return args.positional("file", {
+        describe: "The file to parse; use - to read from stdin",
+        type: "string",
+    }).demand("file");
+}

@@ -22,6 +22,31 @@ function parseEscapeChar(c: string) {
 }
 
 export class ParseError extends Error {
+
+    public readonly line: number;
+    public readonly column: number;
+
+    public readonly shortMessage?: string;
+
+    constructor(match: ohm.MatchResult | string) {
+        super(typeof match === "string" ? match : match.message);
+
+        if (typeof match === "string") {
+            // TODO ?
+            this.line = 0;
+            this.column = 0;
+        } else {
+            // this is gross:
+            const interval: ohm.Interval = (match as any).getInterval();
+            const msg = interval.getLineAndColumnMessage();
+            const m = msg.match(/ (\d+), col (\d+)/);
+            if (!m) throw new Error("Unexpected line and column message");
+
+            this.line = parseInt(m[1], 10);
+            this.column = parseInt(m[2], 10);
+            this.shortMessage = match.shortMessage;
+        }
+    }
 }
 
 export class Parser {
@@ -32,7 +57,7 @@ export class Parser {
         const [g, s] = await this.ensureGrammar();
         const match = g.match(fileContents);
         if (!match.succeeded()) {
-            throw new ParseError(match.message);
+            throw new ParseError(match);
         }
 
         const topLevels = s(match).evaluate();

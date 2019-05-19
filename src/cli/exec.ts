@@ -1,8 +1,7 @@
 import chalk from "chalk";
-import fs from "fs-extra";
 
 import { Engine, IResponse } from "../engine";
-import { colorize, println, readAllStdin } from "./util";
+import { colorize, println, readFileValue } from "./util";
 
 export interface IExecuteFlags {
     color: boolean;
@@ -24,12 +23,7 @@ export async function executeRequest(
     opts: IExecuteOpts,
     lifecycle: IExecuteLifecycle = {},
 ) {
-    // NOTE: yargs seems to give us an empty string instead
-    // if the `-`
-    const contents = (opts.file === "" || opts.file === "-")
-        ? await readAllStdin()
-        : await fs.readFile(opts.file);
-
+    const contents = await readFileValue(opts.file);
     return executeOnContents(contents, opts.line, opts, lifecycle);
 }
 

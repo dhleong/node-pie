@@ -2,7 +2,7 @@ import chalk from "Chalk";
 import { ParseError } from "../parser";
 import { executeOnContents, executeRequest, IExecuteLifecycle } from "./exec";
 import { executeFlagDefaults } from "./flags";
-import { clearScreen, println, readLines, startSpinner } from "./util";
+import { clearScreen, isStdinFileValue, println, readLines, startSpinner } from "./util";
 
 type DaemonCommand = () => void;
 
@@ -51,7 +51,7 @@ interface ISimpleExec {
 }
 
 function isSimpleExec(json: any): json is ISimpleExec {
-    if (json.file === "" || json.file === "-") {
+    if (isStdinFileValue(json.file)) {
         // this is used to indicate stdin, which is
         // not compatible with daemon mode
         throw new Error("Invalid file name: -");
