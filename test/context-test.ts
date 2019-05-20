@@ -28,7 +28,7 @@ GET /captains/$captain
         `);
 
         const context = RequestContext.create(file, 9);
-        context.vars.captain.should.equal("mreynolds");
+        context.vars.captain.value.should.equal("mreynolds");
     });
 
     it("supports multiple environments", async () => {
@@ -44,8 +44,8 @@ GET /ships/$class
         `);
 
         const context = RequestContext.create(file, 9);
-        context.vars.captain.should.equal("mreynolds");
-        context.vars.class.should.equal("03-K64-Firefly");
+        context.vars.captain.value.should.equal("mreynolds");
+        context.vars.class.value.should.equal("03-K64-Firefly");
     });
 
     it("handles request-specific headers", async () => {
@@ -60,6 +60,6 @@ Authorization: kaylee
         `);
 
         const context = RequestContext.create(file, 8);
-        context.headers.authorization.should.equal("kaylee");
+        context.headers.authorization.value.should.equal("kaylee");
     });
 });

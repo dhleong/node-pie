@@ -4,34 +4,32 @@ export enum VarType {
 }
 
 export class Var {
-    public static header(name: string, value: string) {
-        return new Var(VarType.Header, name, value);
+    public static header(name: string, value: string, interval: IInterval) {
+        return new Var(VarType.Header, name, value, interval);
     }
 
-    public static variable(name: string, value: string | number) {
-        return new Var(VarType.Variable, name, value);
+    public static variable(name: string, value: string | number, interval: IInterval) {
+        return new Var(VarType.Variable, name, value, interval);
     }
 
     constructor(
         public readonly type: VarType,
         public readonly name: string,
         public readonly value: string | number,
+        public readonly interval: IInterval,
     ) {}
+
+    public get stringValue(): string {
+        return this.value.toString();
+    }
 }
 
 export class EnvironmentDef {
     constructor(
         public readonly id: string,
         public readonly vars: Var[],
+        public readonly interval: IInterval,
     ) {}
-}
-
-/**
- * Character range within the source file
- */
-export interface IInterval {
-    start: number;
-    end: number;
 }
 
 export class RequestDef {
@@ -49,4 +47,12 @@ export class PieFile {
         public source: string,
         public readonly entries: Array<Var | EnvironmentDef | RequestDef>,
     ) {}
+}
+
+/**
+ * Character range within the source file
+ */
+export interface IInterval {
+    start: number;
+    end: number;
 }

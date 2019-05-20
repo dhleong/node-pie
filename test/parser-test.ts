@@ -2,7 +2,7 @@ import * as chai from "chai";
 import chaiSubset from "chai-subset";
 
 import { AssertionError } from "chai";
-import { EnvironmentDef, RequestDef, Var } from "../src/ast";
+import { EnvironmentDef, RequestDef, Var, VarType } from "../src/ast";
 import { Parser } from "../src/parser";
 
 chai.use(chaiSubset);
@@ -22,6 +22,31 @@ async function exceptionOf(promise: Promise<any>): Promise<Error> {
     }
 }
 
+function interval(start: number, end: number) {
+    return { end, start };
+}
+
+function partialEnvironmentDef(
+    name: string,
+    vars: Array<Partial<Var>>,
+) {
+    const full = new EnvironmentDef(
+        name,
+        vars as Var[],
+        interval(0, 0),
+    );
+    delete (full as any).interval;
+    return full;
+}
+
+function header(name: string, value: string) {
+    return { name, type: VarType.Header, value };
+}
+
+function variable(name: string, value: string | number) {
+    return { name, type: VarType.Variable, value };
+}
+
 describe("Parser", () => {
     it("Should handle blank-line separated env defs", async () => {
         const file = await new Parser().parse(`
@@ -37,9 +62,10 @@ describe("Parser", () => {
             new EnvironmentDef(
                 "serenity",
                 [
-                    Var.header("Auth", "mreynolds"),
-                    Var.variable("cargo", "geisha dolls"),
+                    Var.header("Auth", "mreynolds", interval(17, 32)),
+                    Var.variable("cargo", "geisha dolls", interval(38, 61)),
                 ],
+                interval(2, 71),
             ),
         ]);
     });
@@ -72,8 +98,8 @@ GET /crew
                 path: "/cargo",
 
                 headers: [
-                    Var.header("Ship", "serenity"),
-                    Var.header("Pilot", "wash"),
+                    // Var.header("Ship", "serenity"),
+                    // Var.header("Pilot", "wash"),
                 ],
             },
         ]);
@@ -144,11 +170,11 @@ POST /cargo
         `.trim());
 
         file.entries.should.containSubset([
-            new EnvironmentDef(
+            partialEnvironmentDef(
                 "serenity",
                 [
-                    Var.header("Auth", "mreynolds"),
-                    Var.variable("type", "firefly"),
+                    header("Auth", "mreynolds"),
+                    variable("type", "firefly"),
                 ],
             ),
             {
@@ -167,7 +193,7 @@ $cargo = "\\"totally legal\\" \\\\ awesome goods"
         `);
 
         file.entries.should.containSubset([
-            Var.variable("cargo", '"totally legal" \\ awesome goods'),
+            variable("cargo", '"totally legal" \\ awesome goods'),
         ]);
     });
 
@@ -175,7 +201,7 @@ $cargo = "\\"totally legal\\" \\\\ awesome goods"
         const file = await new Parser().parse(`$cargo = 42`);
 
         file.entries.should.containSubset([
-            Var.variable("cargo", 42),
+            variable("cargo", 42),
         ]);
     });
 

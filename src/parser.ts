@@ -77,16 +77,17 @@ export class Parser {
 
         const s = this.semantics = g.createSemantics().addOperation("evaluate", {
             environmentSpec: (
-                _,
+                atSymbol,
                 envId,
-                __, // separator
-                ___, // comment
+                _, // separator
+                __, // comment
                 defs,
             ) => {
                 const evaluatedDefs = defs.evaluate();
                 return new EnvironmentDef(
                     envId.evaluate(),
                     evaluatedDefs.filter((d: Var) => typeof d !== "string"),
+                    createInterval(atSymbol, defs),
                 );
             },
 
@@ -103,6 +104,10 @@ export class Parser {
             ) => Var.header(
                 name.evaluate(),
                 value.evaluate(),
+                createInterval(
+                    name,
+                    value,
+                ),
             ),
 
             requestDef: (
@@ -119,11 +124,7 @@ export class Parser {
                     requestPath.evaluate(),
                     bodyMaybe.length ? bodyMaybe[0] : null,
                     headerDefs.evaluate()[0] || [],
-                    {
-                        start: methodName.source.startIdx,
-
-                        end: body.source.endIdx,
-                    },
+                    createInterval(methodName, body),
                 );
             },
 
@@ -135,7 +136,7 @@ export class Parser {
             },
 
             variableDef: (
-                _,  // "$"
+                dollarSymbol,
                 name,
                 __,  // separator
                 value,
@@ -143,6 +144,7 @@ export class Parser {
             ) => Var.variable(
                 name.evaluate(),
                 value.evaluate(),
+                createInterval(dollarSymbol, value),
             ),
 
             requestBody: (lines, _) => {
@@ -170,4 +172,15 @@ export class Parser {
 
         return [g, s];
     }
+}
+
+function createInterval(
+    startNode: ohm.Node,
+    endNode: ohm.Node = startNode,
+) {
+    return {
+        start: startNode.source.startIdx,
+
+        end: endNode.source.endIdx,
+    };
 }

@@ -4,7 +4,7 @@ import { LineTracker } from "./line-tracker";
 export const ENV_VAR_NAME = "ENV";
 
 interface IVarMap {
-    [key: string]: string | number;
+    [key: string]: Var;
 }
 
 export class RequestContext {
@@ -77,11 +77,11 @@ export class RequestContext {
     private addVar(v: Var) {
         switch (v.type) {
         case VarType.Header:
-            this.headers[v.name.toLowerCase()] = v.value;
+            this.headers[v.name.toLowerCase()] = v;
             break;
 
         case VarType.Variable:
-            this.vars[v.name] = v.value;
+            this.vars[v.name] = v;
             break;
         }
     }
