@@ -1,4 +1,5 @@
-import { EnvironmentDef, IInterval, PieFile, RequestDef, Var, VarType } from "./ast";
+import { EnvironmentDef, PieFile, RequestDef, Var, VarType } from "./ast";
+import { LineTracker } from "./line-tracker";
 
 export const ENV_VAR_NAME = "ENV";
 
@@ -6,41 +7,12 @@ interface IVarMap {
     [key: string]: string | number;
 }
 
-class LineTracker {
-
-    private lastLine: number = 1;
-    private lastOffset: number = 0;
-
-    constructor(
-        private source: string,
-    ) {}
-
-    public lineRange(interval: IInterval): [number, number] {
-        this.advanceUntil(interval.start);
-        const lineStart = this.lastLine;
-
-        this.advanceUntil(interval.end);
-        const lineEnd = this.lastLine;
-
-        return [lineStart, lineEnd];
-    }
-
-    private advanceUntil(targetOffset: number) {
-        for (; this.lastOffset < targetOffset; ++this.lastOffset) {
-            const ch = this.source[this.lastOffset];
-            if (ch === "\n" || ch === "\r") {
-                ++this.lastLine;
-            }
-        }
-    }
-}
-
 export class RequestContext {
     public static create(
         file: PieFile,
         requestLine: number,
     ) {
-        const context = new RequestContext();
+        const context = new RequestContext(new LineTracker(file.source));
         context.build(file, requestLine);
         return context;
     }
@@ -50,8 +22,14 @@ export class RequestContext {
 
     private requestDef: RequestDef | undefined;
 
-    private constructor() {
+    private constructor(
+        public readonly lines: LineTracker,
+    ) {
         // private!
+    }
+
+    public get hasRequest(): boolean {
+        return this.requestDef !== undefined;
     }
 
     public get request(): RequestDef {
