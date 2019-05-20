@@ -37,6 +37,27 @@ POST /cargo
             engine.buildRequestAt(3);
         }).to.throw(ParseError, /failed to parse/);
     });
+
+    it("interpolates variables", async () => {
+        const engine = await Engine.fromString(`
+Host: https://serenity.co
+Content-Type: application/json
+
+$ship = "serenity"
+$cargo = "bobble-headed-geisha-dolls"
+
+POST /cargo/$ship
+{
+    "id": "$cargo"
+}
+        `.trim());
+
+        const req = engine.buildRequestAt(7);
+        req.url.should.equal("https://serenity.co/cargo/serenity");
+        req.body.should.equal(`{
+    "id": "bobble-headed-geisha-dolls"
+}`);
+    });
 });
 
 // NOTE: I'd like to extend chai "should" for this method,

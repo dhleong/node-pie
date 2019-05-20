@@ -89,7 +89,7 @@ export class Engine {
             body: context.request.body,
             headers,
             method: context.request.method,
-            url: context.headers.host + context.request.path,
+            url: context.headers.host.stringValue + context.request.path,
         };
 
         // interpolate variables
@@ -99,7 +99,7 @@ export class Engine {
             const stringValue = v.stringValue;
 
             // TODO form encoded body vs json body interpolation?
-            if (req.body) req.body = req.body.replace(varName, v);
+            if (req.body) req.body = req.body.replace(varName, stringValue);
             req.url = (req.url as string).replace(varName, encodeURIComponent(stringValue));
 
             for (const [header, headerValue] of Object.entries(headers)) {
