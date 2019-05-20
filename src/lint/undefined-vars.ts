@@ -11,28 +11,13 @@ export function *detectUndefinedVars(
     context: RequestContext,
 ): Iterable<ILint> {
     for (const ref of referencedVars(context)) {
-        const [ line ] = context.lines.lineRange(ref.context);
-        const lineText = context.lines.get(line);
-        const col = lineText.indexOf(ref.name);
-
-        // FIXME it could be elsewhere within the lineRange
+        const location = locateReference(context, ref);
 
         if (!context.vars[ref.name]) {
-            const lint = {
-                // NOTE: column is 1-index, so the -1 to point to the
-                // dollar char cancels out the +1 to match the column
-                column: col === -1 ? 1 : col,
-                line,
+            yield Object.assign({
                 message: `Reference to undefined var $${ref.name}`,
                 type: "warn",
-            } as ILint;
-
-            if (col !== -1) {
-                lint.endLine = lint.line;
-                lint.endColumn = col + ref.name.length + 1;
-            }
-
-            yield lint;
+            } as const, location);
         }
     }
 }
@@ -44,7 +29,6 @@ function *referencedVars(context: RequestContext) {
         yield *findVarsIn(value.interval, value.stringValue);
     }
 
-    // TODO can we be more precise about the detected var location?
     yield *findVarsIn(context.request.interval, context.request.body || "");
     yield *findVarsIn(context.request.interval, context.request.path || "");
 }
@@ -61,4 +45,33 @@ function *findVarsIn(context: IInterval, str: string): Iterable<IReferencedVar> 
             name: match[1],
         };
     }
+}
+
+function locateReference(
+    context: RequestContext,
+    ref: IReferencedVar,
+) {
+    const [ lineStart, lineEnd ] = context.lines.lineRange(ref.context);
+    const varName = "$" + ref.name;
+
+    for (let i = lineStart; i <= lineEnd; ++i) {
+        const lineText = context.lines.get(i);
+        const column = lineText.indexOf(varName);
+        if (column !== -1) {
+            return {
+                // NOTE: column is 1-index
+                column: column + 1,
+                line: i,
+
+                endColumn: column + varName.length,
+                endLine: i,
+            };
+        }
+    }
+
+    // if we couldn't find it, just return the start
+    return {
+        column: 1,
+        line: lineStart,
+    };
 }

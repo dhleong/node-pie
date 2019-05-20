@@ -36,4 +36,27 @@ GET /cargo
             },
         ]);
     });
+
+    it.only("works in multi-line body", async () => {
+        const lint = toList(detectUndefinedVars(
+            await contextOf(`
+Host: https://serenity.co
+POST /cargo
+{
+    "id": "$cargo"
+}
+            `.trim(), 3),
+        ));
+
+        lint.should.containSubset([
+            {
+                column: 12,
+                line: 4,
+                message: "Reference to undefined var $cargo",
+
+                endColumn: 17,
+                endLine: 4,
+            },
+        ]);
+    });
 });
