@@ -11,21 +11,28 @@ export function *detectUndefinedVars(
     context: RequestContext,
 ): Iterable<ILint> {
     for (const ref of referencedVars(context)) {
-        // TODO can we figure out what col the actual reference is on?
         const [ line ] = context.lines.lineRange(ref.context);
         const lineText = context.lines.get(line);
         const col = lineText.indexOf(ref.name);
 
+        // FIXME it could be elsewhere within the lineRange
+
         if (!context.vars[ref.name]) {
-            yield {
+            const lint = {
                 // NOTE: column is 1-index, so the -1 to point to the
                 // dollar char cancels out the +1 to match the column
                 column: col === -1 ? 1 : col,
-                length: col === -1 ? undefined : ref.name.length + 1,
                 line,
                 message: `Reference to undefined var $${ref.name}`,
                 type: "warn",
-            };
+            } as ILint;
+
+            if (col !== -1) {
+                lint.endLine = lint.line;
+                lint.endColumn = col + ref.name.length + 1;
+            }
+
+            yield lint;
         }
     }
 }

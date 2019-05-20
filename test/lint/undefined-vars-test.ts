@@ -28,9 +28,11 @@ GET /cargo
         lint.should.containSubset([
             {
                 column: 16,
-                length: 5,
                 line: 2,
                 message: "Reference to undefined var $auth",
+
+                endColumn: 21,
+                endLine: 2,
             },
         ]);
     });
