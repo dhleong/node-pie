@@ -21,19 +21,7 @@ export async function lint(
 export async function lintContents(
     contents: Buffer | string,
 ) {
-    const foundLint: ILint[] = [];
-    const foundSet: { [key: number]: Set<string> } = {};
-
-    for await (const lintItem of findLint(contents)) {
-        if (
-            foundSet[lintItem.line] && foundSet[lintItem.line].has(lintItem.message)
-        ) {
-            // dup
-            continue;
-        }
-
-        foundLint.push(lintItem);
-    }
+    const foundLint = await findLint(contents);
 
     // print out any errors
     println(JSON.stringify(foundLint));
@@ -44,7 +32,29 @@ export async function lintContents(
     }
 }
 
-export async function *findLint(
+export async function findLint(contents: Buffer | string) {
+    const foundLint: ILint[] = [];
+    const foundSet: { [key: number]: Set<string> } = {};
+
+    for await (const lintItem of generateLint(contents)) {
+        if (
+            foundSet[lintItem.line] && foundSet[lintItem.line].has(lintItem.message)
+        ) {
+            // dup
+            continue;
+        }
+
+        if (!foundSet[lintItem.line]) {
+            foundSet[lintItem.line] = new Set();
+        }
+        foundSet[lintItem.line]!.add(lintItem.message);
+        foundLint.push(lintItem);
+    }
+
+    return foundLint;
+}
+
+async function *generateLint(
     contents: Buffer | string,
 ): AsyncIterable<ILint> {
     const stringContents = contents.toString();
