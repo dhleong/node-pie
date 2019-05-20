@@ -31,13 +31,13 @@ GET /cargo
                 line: 2,
                 message: "Reference to undefined var $auth",
 
-                endColumn: 21,
+                endColumn: 20,
                 endLine: 2,
             },
         ]);
     });
 
-    it.only("works in multi-line body", async () => {
+    it("works in multi-line body", async () => {
         const lint = toList(detectUndefinedVars(
             await contextOf(`
 Host: https://serenity.co
