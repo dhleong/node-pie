@@ -11,6 +11,23 @@ export class LineTracker {
         private source: string,
     ) {}
 
+    /**
+     * @param lineNr in [1, END], as the results of `lineRange`
+     */
+    public get(lineNr: number): string {
+        const index = lineNr - 1;
+        if (index === this.ranges.length) {
+            const start = this.ranges[this.ranges.length - 1].end + 1;
+            const end = this.source.indexOf("\n", start + 1);
+            return this.source.substring(start, end === -1 ? undefined : end);
+        } else if (index > this.ranges.length) {
+            this.advanceUntil(this.source.length - 1);
+        }
+
+        const interval = this.ranges[index];
+        return this.source.substring(interval.start, interval.end);
+    }
+
     public lineRange(interval: IInterval): [number, number] {
         if (interval.start < this.lastOffset) {
             return this.findOldRange(interval);

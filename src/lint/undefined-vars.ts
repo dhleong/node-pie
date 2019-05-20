@@ -1,29 +1,29 @@
+import { IInterval } from "../ast";
 import { RequestContext } from "../context";
 import { ILint } from "./model";
 
-function *findVarsIn(str: string) {
-    const regex = /\$([a-zA-Z0-9_-]+)/g;
-
-    while (true) {
-        const match = regex.exec(str);
-        if (!match) return;
-
-        yield match[1];
-    }
+interface IReferencedVar {
+    name: string;
+    context: IInterval;
 }
 
 export function *detectUndefinedVars(
     context: RequestContext,
 ): Iterable<ILint> {
-    const [ line ] = context.lines.lineRange(context.request.interval);
+    for (const ref of referencedVars(context)) {
+        // TODO can we figure out what col the actual reference is on?
+        const [ line ] = context.lines.lineRange(ref.context);
+        const lineText = context.lines.get(line);
+        const col = lineText.indexOf(ref.name);
 
-    for (const v of referencedVars(context)) {
-        // TODO can we figure out what line and col the actual reference is on?
-        if (!context.vars[v]) {
+        if (!context.vars[ref.name]) {
             yield {
-                column: 1,
+                // NOTE: column is 1-index, so the -1 to point to the
+                // dollar char cancels out the +1 to match the column
+                column: col === -1 ? 1 : col,
+                length: col === -1 ? undefined : ref.name.length + 1,
                 line,
-                message: `Reference to undefined var $${v}`,
+                message: `Reference to undefined var $${ref.name}`,
                 type: "warn",
             };
         }
@@ -31,14 +31,27 @@ export function *detectUndefinedVars(
 }
 
 function *referencedVars(context: RequestContext) {
-    // FIXME: we should report undefined vars in headers
-    // *on the header's line*
     for (const value of Object.values(context.headers)) {
-        if (typeof value !== "string") continue;
+        if (typeof value.value !== "string") continue;
 
-        yield *findVarsIn(value);
+        yield *findVarsIn(value.interval, value.stringValue);
     }
 
-    yield *findVarsIn(context.request.body || "");
-    yield *findVarsIn(context.request.path || "");
+    // TODO can we be more precise about the detected var location?
+    yield *findVarsIn(context.request.interval, context.request.body || "");
+    yield *findVarsIn(context.request.interval, context.request.path || "");
+}
+
+function *findVarsIn(context: IInterval, str: string): Iterable<IReferencedVar> {
+    const regex = /\$([a-zA-Z0-9_-]+)/g;
+
+    while (true) {
+        const match = regex.exec(str);
+        if (!match) return;
+
+        yield {
+            context,
+            name: match[1],
+        };
+    }
 }
