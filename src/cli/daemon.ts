@@ -24,6 +24,11 @@ async function runDaemon(stream: NodeJS.ReadStream) {
         }
 
         const command = extractCommand(json, {
+            onError() {
+                stopSpinner();
+                clearScreen();
+            },
+
             onResponseReceived() {
                 stopSpinner();
                 clearScreen();
@@ -33,6 +38,8 @@ async function runDaemon(stream: NodeJS.ReadStream) {
         try {
             await command();
         } catch (e) {
+            stopSpinner();
+
             if (e instanceof ParseError) {
                 // TODO better coloring?
                 println(chalk.red(e.message));

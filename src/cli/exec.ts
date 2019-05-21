@@ -16,6 +16,7 @@ export interface IExecuteOpts extends IExecuteFlags {
 }
 
 export interface IExecuteLifecycle {
+    onError?(): void;
     onResponseReceived?(): void;
 }
 
@@ -47,6 +48,8 @@ export async function executeOnContents(
 
         formatResponse(opts, response);
     } catch (e) {
+        trigger(lifecycle, "onError");
+
         formatError(e);
     } finally {
         chalk.level = oldChalkLevel;
