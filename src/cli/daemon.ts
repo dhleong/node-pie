@@ -16,7 +16,14 @@ async function runDaemon(stream: NodeJS.ReadStream) {
 
         const stopSpinner = startSpinner("Fetching...");
 
-        const command = extractCommand(JSON.parse(line), {
+        let json: any;
+        try {
+            json = JSON.parse(line);
+        } catch (e) {
+            throw new Error(`Error parsing:\n\n${line}\n\nStack:${e.stack}`);
+        }
+
+        const command = extractCommand(json, {
             onResponseReceived() {
                 stopSpinner();
                 clearScreen();
