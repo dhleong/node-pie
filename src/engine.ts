@@ -1,3 +1,5 @@
+import { parse } from "url";
+
 import request from "request-promise-native";
 import { StatusCodeError } from "request-promise-native/errors";
 
@@ -75,9 +77,6 @@ export class Engine {
         lineNr: number,
     ) {
         const context = RequestContext.create(this.file, lineNr);
-        if (!context.headers.host) {
-            throw new Error("No host provided");
-        }
 
         const headers: {[key: string]: string} = Object.assign({}, defaultHeaders);
         for (const [header, headerValue] of Object.entries(context.headers)) {
@@ -89,7 +88,7 @@ export class Engine {
             body: context.request.body,
             headers,
             method: context.request.method,
-            url: context.headers.host.stringValue + context.request.path,
+            url: buildUrl(context),
         };
 
         // interpolate variables
@@ -122,6 +121,24 @@ export class Engine {
         return req;
     }
 
+}
+
+function buildUrl(context: RequestContext) {
+    const parsed = parse(context.request.path);
+    if (parsed.host) {
+        return context.request.path;
+    }
+
+    if (!context.headers.host) {
+        throw new Error("No host provided");
+    }
+
+    let url = context.headers.host.stringValue;
+    if (!(url.endsWith("/") || context.request.path.startsWith("/"))) {
+        url += "/";
+    }
+
+    return url + context.request.path;
 }
 
 function inferContentType(body: string) {
