@@ -1,7 +1,7 @@
 import chalk from "chalk";
 
 import { Engine, IResponse } from "../engine";
-import { colorize, println, readFileValue, startSpinner } from "./util";
+import { clearScreen, colorize, println, readFileValue, startSpinner } from "./util";
 
 export interface IExecuteFlags {
     color: boolean;
@@ -50,6 +50,8 @@ export async function executeOnContents(
         const response = await engine.performRequestAt(line);
 
         stopSpinner();
+        if (opts.spinner) clearScreen();
+
         trigger(lifecycle, "onResponseReceived");
 
         formatResponse(opts, response);
