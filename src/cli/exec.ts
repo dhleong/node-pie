@@ -42,20 +42,25 @@ export async function executeOnContents(
 
     const engine = await Engine.fromString(contents.toString());
 
-    const stopSpinner = opts.spinner
+    const doStopSpinner = opts.spinner
         ? startSpinner("Fetching...")
-        : () => { /* nop */ };
+        : null;
+    const stopSpinner = () => {
+        if (doStopSpinner) {
+            doStopSpinner();
+            clearScreen();
+        }
+    };
 
     try {
         const response = await engine.performRequestAt(line);
 
         stopSpinner();
-        if (opts.spinner) clearScreen();
-
         trigger(lifecycle, "onResponseReceived");
 
         formatResponse(opts, response);
     } catch (e) {
+        stopSpinner();
         trigger(lifecycle, "onError");
 
         formatError(e);
