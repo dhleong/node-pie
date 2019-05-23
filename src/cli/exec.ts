@@ -1,12 +1,13 @@
 import chalk from "chalk";
 
 import { Engine, IResponse } from "../engine";
-import { colorize, println, readFileValue } from "./util";
+import { colorize, println, readFileValue, startSpinner } from "./util";
 
 export interface IExecuteFlags {
     color: boolean;
     headers: boolean;
     raw: boolean;
+    spinner: boolean;
     status: boolean;
 }
 
@@ -41,9 +42,14 @@ export async function executeOnContents(
 
     const engine = await Engine.fromString(contents.toString());
 
+    const stopSpinner = opts.spinner
+        ? startSpinner("Fetching...")
+        : () => { /* nop */ };
+
     try {
         const response = await engine.performRequestAt(line);
 
+        stopSpinner();
         trigger(lifecycle, "onResponseReceived");
 
         formatResponse(opts, response);

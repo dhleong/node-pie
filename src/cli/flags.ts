@@ -5,6 +5,7 @@ export const executeFlagDefaults: IExecuteFlags = {
     color: true,
     headers: true,
     raw: false,
+    spinner: false,
     status: true,
 };
 
@@ -26,6 +27,10 @@ export function withExecuteFlags<T>(
     }).option("status", {
         default: executeFlagDefaults.status,
         desc: "Include status line in output",
+        type: "boolean",
+    }).option("spinner", {
+        default: false,
+        desc: "Show a spinner while the request runs",
         type: "boolean",
     });
 }
