@@ -4,7 +4,8 @@ import { RequestContext } from "../context";
 import { LineTracker } from "../line-tracker";
 import { ILint } from "../lint/model";
 import { detectUndefinedVars } from "../lint/undefined-vars";
-import { ParseError, Parser } from "../parser";
+import { ParseError } from "../parse-error";
+import { Parser } from "../parser";
 import { println, readFileValue } from "./util";
 
 export interface ILintOpts {

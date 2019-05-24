@@ -1,5 +1,5 @@
 import chalk from "Chalk";
-import { ParseError } from "../parser";
+import { ParseError } from "../parse-error";
 import { executeOnContents, executeRequest, IExecuteLifecycle } from "./exec";
 import { executeFlagDefaults } from "./flags";
 import { clearScreen, isStdinFileValue, println, readLines, startSpinner } from "./util";

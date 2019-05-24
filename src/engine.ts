@@ -6,7 +6,8 @@ import { StatusCodeError } from "request-promise-native/errors";
 import { IncomingHttpHeaders } from "http";
 import { PieFile } from "./ast";
 import { RequestContext } from "./context";
-import { ParseError, Parser } from "./parser";
+import { ParseError } from "./parse-error";
+import { Parser } from "./parser";
 
 export interface IResponse {
     body: any;
