@@ -1,6 +1,7 @@
 import chalk from "chalk";
 
-import { Engine, IResponse } from "../engine";
+import * as EngineModule from "../engine";
+import { IResponse } from "../engine";
 import { clearScreen, colorize, println, readFileValue, startSpinner } from "./util";
 
 export interface IExecuteFlags {
@@ -40,8 +41,6 @@ export async function executeOnContents(
         chalk.level = 0;
     }
 
-    const engine = await Engine.fromString(contents.toString());
-
     const doStopSpinner = opts.spinner
         ? startSpinner("Fetching...")
         : null;
@@ -51,6 +50,9 @@ export async function executeOnContents(
             clearScreen();
         }
     };
+
+    const Engine = await getEngine();
+    const engine = await Engine.fromString(contents.toString());
 
     try {
         const response = await engine.performRequestAt(line);
@@ -67,6 +69,14 @@ export async function executeOnContents(
     } finally {
         chalk.level = oldChalkLevel;
     }
+}
+
+let engineClass: typeof EngineModule.Engine;
+async function getEngine() {
+    if (engineClass) return engineClass;
+    const engineModule = await import("../engine");
+    engineClass = engineModule.Engine;
+    return engineClass;
 }
 
 function formatHeader(
