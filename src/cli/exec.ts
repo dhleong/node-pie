@@ -1,3 +1,6 @@
+import _debug from "debug";
+const debug = _debug("pie:engine");
+
 import chalk from "chalk";
 
 import * as EngineModule from "../engine";
@@ -55,10 +58,13 @@ export async function executeOnContents(
     const engine = await Engine.fromString(contents.toString());
 
     try {
-        const response = await engine.performRequestAt(line);
+        const request = engine.buildRequestAt(line);
+        const response = await engine.performRequest(request);
 
         stopSpinner();
         trigger(lifecycle, "onResponseReceived");
+
+        debug("Performed request:", request);
 
         formatResponse(opts, response);
     } catch (e) {
