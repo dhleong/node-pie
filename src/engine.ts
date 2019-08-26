@@ -99,11 +99,11 @@ export class Engine {
             const stringValue = v.stringValue;
 
             // TODO form encoded body vs json body interpolation?
-            if (req.body) req.body = req.body.replace(varName, stringValue);
-            req.url = (req.url as string).replace(varName, encodeURIComponent(stringValue));
+            if (req.body) req.body = replaceAll(req.body, varName, stringValue);
+            req.url = replaceAll(req.url as string, varName, encodeURIComponent(stringValue));
 
             for (const [header, headerValue] of Object.entries(headers)) {
-                headers[header] = headerValue.replace(varName, stringValue);
+                headers[header] = replaceAll(headerValue, varName, stringValue);
             }
         }
 
@@ -156,4 +156,8 @@ function inferContentType(body: string) {
     }
 
     // TODO ?
+}
+
+function replaceAll(haystack: string, needle: string, replacement: string) {
+    return haystack.split(needle).join(replacement);
 }

@@ -78,14 +78,16 @@ $cargo = "bobble-headed-geisha-dolls"
 
 POST /cargo/$ship
 {
-    "id": "$cargo"
+    "id": "$cargo",
+    "name": "$cargo"
 }
         `.trim());
 
         const req = engine.buildRequestAt(7);
         req.url.should.equal("https://serenity.co/cargo/serenity");
         req.body.should.equal(`{
-    "id": "bobble-headed-geisha-dolls"
+    "id": "bobble-headed-geisha-dolls",
+    "name": "bobble-headed-geisha-dolls"
 }`);
     });
 
