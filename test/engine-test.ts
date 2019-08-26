@@ -2,7 +2,7 @@ import * as chai from "chai";
 
 import request = require("request");
 import { Engine } from "../src/engine";
-import { ParseError } from "../src/parser";
+import { ParseError } from "../src/parse-error";
 
 chai.should();
 const { expect } = chai;
