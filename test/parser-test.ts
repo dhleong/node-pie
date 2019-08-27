@@ -205,6 +205,14 @@ $cargo = "\\"totally legal\\" \\\\ awesome goods"
         ]);
     });
 
+    it("handles empty string variables", async () => {
+        const file = await new Parser().parse(`$cargo = ""`);
+
+        file.entries.should.containSubset([
+            variable("cargo", ""),
+        ]);
+    });
+
     it("provides helpful errors on variable syntax errors", async () => {
         const e = await exceptionOf(new Parser().parse(`$cargo = dolls`));
         e.should.have.property("message")

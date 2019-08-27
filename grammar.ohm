@@ -49,7 +49,7 @@ Pie {
     = stringValue | numberValue
 
     stringValue (a string literal)
-    = "\"" ((~("\"" | "\\") any) | "\\\\" | "\\\"")+ "\""
+    = "\"" ((~("\"" | "\\") any) | "\\\\" | "\\\"")* "\""
 
     numberValue (a number literal)
     = digit+
