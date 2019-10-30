@@ -1,4 +1,11 @@
-import { EnvironmentDef, PieFile, RequestDef, Var, VarType } from "./ast";
+import {
+    EnvironmentDef,
+    PieFile,
+    ProcessorDef,
+    RequestDef,
+    Var,
+    VarType,
+} from "./ast";
 import { LineTracker } from "./line-tracker";
 
 export const ENV_VAR_NAME = "ENV";
@@ -21,6 +28,7 @@ export class RequestContext {
     public readonly headers: IVarMap = {};
 
     private requestDef: RequestDef | undefined;
+    private processorDef: ProcessorDef | undefined;
 
     private constructor(
         public readonly lines: LineTracker,
@@ -36,6 +44,10 @@ export class RequestContext {
         const req = this.requestDef;
         if (!req) throw new Error("No request found");
         return req;
+    }
+
+    public get processor(): ProcessorDef | undefined {
+        return this.processorDef;
     }
 
     private build(file: PieFile, requestLine: number) {
@@ -68,9 +80,23 @@ export class RequestContext {
                     for (const v of item.headers) {
                         this.addVar(v);
                     }
-                    return; // done!
+                    break; // done!
                 }
             }
+        }
+
+        const def = this.requestDef;
+        if (!def) return;
+
+        if (def.processorName) {
+            const processor = this.findProcessor(file, def.processorName);
+            if (!processor) {
+                throw new Error(
+                    `Request uses non-existant Processor ${def.processorName}`,
+                );
+            }
+
+            this.processorDef = processor;
         }
     }
 
@@ -97,6 +123,17 @@ export class RequestContext {
             }
 
             if (item.name === name) return item;
+        }
+    }
+
+    private findProcessor(
+        file: PieFile,
+        name: string,
+    ) {
+        for (const item of file.entries) {
+            if (item instanceof ProcessorDef && item.name === name) {
+                return item;
+            }
         }
     }
 }

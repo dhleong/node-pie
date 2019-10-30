@@ -218,4 +218,21 @@ $cargo = "\\"totally legal\\" \\\\ awesome goods"
         e.should.have.property("message")
             .that.matches(/Expected .* string literal/);
     });
+
+    it("handles processors", async () => {
+       const file = await new Parser().parse(`
+GET /auth | authenticate
+
+PROCESSOR authenticate \`\`\`
+state.auth = json.rank.captain;
+\`\`\`
+       `);
+
+       file.entries[0].should.have.property("processorName").that.equals("authenticate");
+
+       file.entries[1].should.have.property("name").that.equals("authenticate");
+       file.entries[1].should.have.property("source").that.equals(`
+           state.auth = json.rank.captain;
+       `.trim());
+    });
 });

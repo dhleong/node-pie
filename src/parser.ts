@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import ohm from "ohm-js";
 import path from "path";
 
-import { EnvironmentDef, PieFile, RequestDef, Var } from "./ast";
+import { EnvironmentDef, PieFile, ProcessorDef, RequestDef, Var } from "./ast";
 import { ParseError } from "./parse-error";
 
 function joinString(node: ohm.Node) {
@@ -83,18 +83,41 @@ export class Parser {
                 ),
             ),
 
+            processorDef: (
+                _,
+                __,
+                name,
+                ___,
+                openingBracket,
+                statements,
+                closingBracket,
+            ) => new ProcessorDef(
+                name.sourceString.trim(),
+                statements.sourceString.trim(),
+            ),
+
+            processorPipe: (
+                _,
+                pipeLiteral,
+                __,
+                name,
+            ) => name.sourceString.trim(),
+
             requestDef: (
                 methodName,
                 requestPath,
+                processor,
                 eol,
                 headerDefs,
                 body,
             ) => {
                 const bodyMaybe = body.evaluate();
+                const processorMaybe = processor.evaluate();
 
                 return new RequestDef(
                     methodName.sourceString.trim(),
                     requestPath.evaluate(),
+                    processorMaybe.length ? processorMaybe[0] : null,
                     bodyMaybe.length ? bodyMaybe[0] : null,
                     headerDefs.evaluate()[0] || [],
                     createInterval(methodName, body),
@@ -127,6 +150,7 @@ export class Parser {
             },
 
             identifier: joinString,
+            requestPath: joinString,
             value: joinString,
 
             comment: (_, __, ___) => "",

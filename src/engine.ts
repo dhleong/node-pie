@@ -8,6 +8,7 @@ import { PieFile } from "./ast";
 import { RequestContext } from "./context";
 import { ParseError } from "./parse-error";
 import { Parser } from "./parser";
+import { ResponseProcessor } from "./processor";
 
 export interface IResponse {
     body: any;
@@ -37,6 +38,32 @@ export class Engine {
     ): Promise<IResponse> {
         const req = this.buildRequestAt(lineNr);
         return this.performRequest(req);
+    }
+
+    public async processRequestAt(
+        lineNr: number,
+    ) {
+        const context = this.findRequestContextAt(lineNr);
+        const req = this.buildRequest(context);
+        return this.processRequest(context, req);
+    }
+
+    public async processRequest(
+        context: RequestContext,
+        req: request.OptionsWithUrl,
+    ) {
+        const response = await this.performRequest(req);
+
+        let newVars: any | undefined;
+        if (context.processor) {
+            const processor = new ResponseProcessor(context.processor);
+            newVars = await processor.process(context, response);
+        }
+
+        return {
+            newVars,
+            response,
+        };
     }
 
     public async performRequest(
@@ -74,11 +101,27 @@ export class Engine {
         };
     }
 
-    public buildRequestAt(
+    public findRequestContextAt(
         lineNr: number,
     ) {
         const context = RequestContext.create(this.file, lineNr);
+        if (!context.hasRequest) {
+            // error
+            throw new Error("No request found");
+        }
+        return context;
+    }
 
+    public buildRequestAt(
+        lineNr: number,
+    ) {
+        const context = this.findRequestContextAt(lineNr);
+        return this.buildRequest(context);
+    }
+
+    public buildRequest(
+        context: RequestContext,
+    ) {
         const headers: {[key: string]: string} = Object.assign({}, defaultHeaders);
         for (const [header, headerValue] of Object.entries(context.headers)) {
             if (header === "host") continue;

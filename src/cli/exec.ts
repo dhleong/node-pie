@@ -10,6 +10,7 @@ import { clearScreen, colorize, println, readFileValue, startSpinner } from "./u
 export interface IExecuteFlags {
     color: boolean;
     headers: boolean;
+    oob: boolean;
     raw: boolean;
     spinner: boolean;
     status: boolean;
@@ -58,8 +59,17 @@ export async function executeOnContents(
     const engine = await Engine.fromString(contents.toString());
 
     try {
-        const request = engine.buildRequestAt(line);
-        const response = await engine.performRequest(request);
+        const context = engine.findRequestContextAt(line);
+        const request = engine.buildRequest(context);
+        const {
+            newVars,
+            response,
+        } = await engine.processRequest(context, request);
+
+        if (opts.oob) {
+            // tslint:disable-next-line no-console
+            console.error("pie:oob", JSON.stringify([ "new-vars", newVars ]));
+        }
 
         stopSpinner();
         trigger(lifecycle, "onResponseReceived");
