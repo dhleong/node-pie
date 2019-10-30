@@ -4,6 +4,7 @@ import { IExecuteFlags } from "./exec";
 export const executeFlagDefaults: IExecuteFlags = {
     color: true,
     headers: true,
+    oob: false,
     raw: false,
     spinner: false,
     status: true,
@@ -19,6 +20,10 @@ export function withExecuteFlags<T>(
     }).option("color", {
         default: executeFlagDefaults.color,
         desc: "Colorize JSON responses",
+        type: "boolean",
+    }).option("oob", {
+        default: executeFlagDefaults.oob,
+        desc: "Output out-of-band messages to stderr",
         type: "boolean",
     }).option("raw", {
         default: executeFlagDefaults.raw,
