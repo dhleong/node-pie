@@ -36,9 +36,17 @@ export class RequestDef {
     constructor(
         public readonly method: string,
         public readonly path: string,
+        public readonly processorName: string | null,
         public readonly body: string | null,
         public readonly headers: Var[],
         public readonly interval: IInterval,
+    ) {}
+}
+
+export class ProcessorDef {
+    constructor(
+        public readonly name: string,
+        public readonly source: string,
     ) {}
 }
 

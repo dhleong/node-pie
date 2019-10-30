@@ -1,7 +1,7 @@
 Pie {
     pieFile = (comment | topLevel | blankLine)*
 
-    topLevel = environmentSpec | environmentalDef | requestDef
+    topLevel = environmentSpec | environmentalDef | requestDef | processorDef
 
     environmentalDef = headerDef | variableDef
 
@@ -20,21 +20,33 @@ Pie {
     inEnvDef (Indented Header or variable)
     = eos indent environmentalDef
 
+    processorDef
+    = "PROCESSOR" space+ identifier space+ "```" processorStatement* "```"
+
+    processorStatement
+    = ~"```" any
+
+    processorValue
+    = identifier | variableValue
+
+    processorPipe (Processor Pipe)
+    = space+ "|" space+ identifier
+
     requestDef (Request)
-    = requestMethod requestPath #eos requestHeaders? requestBody?
+    = requestMethod requestPath processorPipe? #eos requestHeaders? requestBody?
 
     requestMethod
     = methodName space+
 
     // TODO allow trailing comments?
     requestPath
-    = value
+    = (~eol ~space any)+
 
     requestHeaders
     = (headerDef eos)+
 
     methodName (HTTP Request Method)
-    = upper+
+    = ~"PROCESSOR" upper+
 
     requestBody (Any series of non-blank lines)
     = (~emptyLine value eos)+
