@@ -12,7 +12,7 @@ export class ResponseProcessor {
     public async process(context: RequestContext, response: IResponse) {
         const vars: {[name: string]: any} = {};
         for (const varName of Object.keys(context.vars)) {
-            vars[varName] = context.vars[varName];
+            vars[varName] = context.vars[varName].value;
         }
 
         const sandbox: any = {
@@ -30,6 +30,14 @@ export class ResponseProcessor {
         });
         vm.run(this.def.source);
 
-        return sandbox.vars;
+        const result: typeof vars = {};
+        for (const varName of Object.keys(sandbox.vars)) {
+            const contextVar = context.vars[varName];
+            if (!contextVar || sandbox.vars[varName] !== contextVar.value) {
+                result[varName] = sandbox.vars[varName];
+            }
+        }
+
+        return result;
     }
 }

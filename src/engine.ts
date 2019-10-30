@@ -57,7 +57,7 @@ export class Engine {
         let newVars: any | undefined;
         if (context.processor) {
             const processor = new ResponseProcessor(context.processor);
-            newVars = processor.process(context, response);
+            newVars = await processor.process(context, response);
         }
 
         return {
