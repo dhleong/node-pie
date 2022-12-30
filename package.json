@@ -55,7 +55,7 @@
     "@types/yargs": "^13.0.2",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "typescript": "^3.5.3"
   }
 }
